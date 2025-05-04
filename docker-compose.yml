@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    environment:
+      - SERVICES=kinesis,firehose,s3,dynamodb,iam,sts # ← adicionamos dynamodb
+      - PERSISTENCE=1
+      - DEBUG=1
+    volumes:
+      - ./localstack-data:/var/lib/localstack
