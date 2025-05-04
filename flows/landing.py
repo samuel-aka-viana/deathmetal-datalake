@@ -15,7 +15,7 @@ AWS_KWARGS = dict(
 )
 
 
-def boto(service):  # helper
+def boto(service):
     return boto3.client(service, **AWS_KWARGS)
 
 
@@ -25,12 +25,12 @@ def list_csv(folder: str = "csv") -> List[Path]:
 
 
 @task
-def push_csv_in_chunks(csv_path: Path, max_bytes: int = 900*1024):
+def push_csv_in_chunks(csv_path: Path, max_bytes: int = 900 * 1024):
     kin = boto("kinesis")
     dataset = csv_path.stem.lower()
     stream = {
-        "albums":  "albums-stream",
-        "bands":   "bands-stream",
+        "albums": "albums-stream",
+        "bands": "bands-stream",
         "reviews": "reviews-stream",
     }[dataset]
 
@@ -52,9 +52,9 @@ def push_csv_in_chunks(csv_path: Path, max_bytes: int = 900*1024):
     if size > len(header.encode()):
         kin.put_record(StreamName=stream, Data=chunk.encode(), PartitionKey=dataset)
 
+
 @task(log_prints=True, retries=3, retry_delay_seconds=30)
 def wait_firehose(bucket="csv-batch-bucket", prefix="landing/") -> List[str]:
-    """Espera pelo menos 1 objeto novo no prefixo landing/."""
     s3, log = boto("s3"), get_run_logger()
     while True:
         resp = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
