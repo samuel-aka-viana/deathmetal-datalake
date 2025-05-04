@@ -1,0 +1,10 @@
+[flake8]
+exclude=
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    wait.py
+    */__init__.py
+max-complexity=15
+max-line-length=160
