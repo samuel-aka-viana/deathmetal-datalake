@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 from prefect import flow, task
-from domain.landing_service import LandingService
+from src.domain.landing_service import LandingService
 
 @task
 def list_csv(folder: str = "csv") -> List[Path]:

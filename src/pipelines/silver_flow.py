@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import daft
-from domain.album_service import AlbumService
-from domain.band_service import BandService
-from domain.catalog import get_catalog
-from domain.review_service import ReviewService
+from src.domain.album_service import AlbumService
+from src.domain.band_service import BandService
+from src.domain.catalog import get_catalog
+from src.domain.review_service import ReviewService
 from prefect import flow, task
 
 CATALOG = get_catalog()

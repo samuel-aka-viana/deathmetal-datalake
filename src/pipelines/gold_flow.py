@@ -1,8 +1,8 @@
 
 from __future__ import annotations
 from prefect import flow, task
-from domain.review_metrics import ReviewMetrics
-from domain.catalog import get_catalog
+from src.domain.review_metrics import ReviewMetrics
+from src.domain.catalog import get_catalog
 import daft
 
 CATALOG = get_catalog()

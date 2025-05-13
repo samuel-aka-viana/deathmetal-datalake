@@ -1,10 +1,10 @@
 
 from prefect import flow, task
 import daft
-from domain.album_service import AlbumService
-from domain.band_service import BandService
-from domain.review_service import ReviewService
-from domain.catalog import get_catalog
+from src.domain.album_service import AlbumService
+from src.domain.band_service import BandService
+from src.domain.review_service import ReviewService
+from src.domain.catalog import get_catalog
 
 CATALOG = get_catalog()
 
