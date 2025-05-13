@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prefect-worker
+  namespace: lakehouse
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prefect-worker-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "services"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prefect-worker-binding
+subjects:
+- kind: ServiceAccount
+  name: prefect-worker
+  namespace: lakehouse
+roleRef:
+  kind: ClusterRole
+  name: prefect-worker-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prefect-worker
+  namespace: lakehouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prefect-worker
+  template:
+    metadata:
+      labels:
+        app: prefect-worker
+    spec:
+      serviceAccountName: prefect-worker
+      containers:
+      - name: worker
+        image: ghcr.io/samuel-aka-viana/dmlakehouse:latest
+        args: ["prefect", "worker", "start", "-p", "lakehouse-k8s"]
+        env:
+        - name: PREFECT_API_URL
+          value: "http://prefect.api.svc.cluster.local:4200/api"
+        - name: PREFECT_LOGGING_LEVEL
+          value: "INFO"
+        # Usando as variáveis do ConfigMap compartilhado
+        envFrom:
+        - configMapRef:
+            name: lakehouse-config
+        imagePullPolicy: IfNotPresent

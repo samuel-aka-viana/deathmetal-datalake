@@ -1,0 +1,19 @@
+service:
+  type: ClusterIP
+  port: 8080
+
+catalogsConfigMap:
+  nessie.properties: |
+    connector.name=iceberg
+    iceberg.catalog.type=nessie
+    iceberg.nessie.uri=http://nessie.lakehouse.svc.cluster.local:19120/api/v1
+    iceberg.nessie.warehouse=s3a://datalake/warehouse
+    hive.s3.endpoint=http://minio.lakehouse.svc.cluster.local:9000
+    hive.s3.path-style-access=true
+    hive.s3.access-key=${MINIO_ROOT_USER}
+    hive.s3.secret-key=${MINIO_ROOT_PASSWORD}
+
+resources:
+  requests:
+    memory: 1Gi
+    cpu: 500m

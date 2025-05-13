@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trino
+  namespace: lakehouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trino
+  template:
+    metadata:
+      labels:
+        app: trino
+    spec:
+      containers:
+      - name: trino
+        image: trinodb/trino:443
+        ports:
+          - containerPort: 8080
+            name: http
+        volumeMounts:
+          - name: catalogs
+            mountPath: /etc/trino/catalog
+        readinessProbe:
+          httpGet:
+            path: /v1/info
+            port: http
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /v1/info
+            port: http
+          initialDelaySeconds: 40
+          periodSeconds: 20
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+      volumes:
+        - name: catalogs
+          configMap:
+            name: lakehouse-config
+            items:
+              - key: nessie.properties
+                path: nessie.properties
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trino
+  namespace: lakehouse
+spec:
+  selector:
+    app: trino
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

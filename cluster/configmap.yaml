@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lakehouse-config
+  namespace: lakehouse
+data:
+  # Configurações globais compartilhadas
+  WAREHOUSE: "s3a://datalake/warehouse"
+  AWS_ENDPOINT: "http://minio.lakehouse.svc.cluster.local:9000"
+  AWS_ACCESS_KEY_ID: "minio"
+  AWS_SECRET_ACCESS_KEY: "minio123"
+  AWS_PATH_STYLE_ACCESS: "true"
+
+  # Catálogo Nessie para o Trino
+  nessie.properties: |
+    connector.name=iceberg
+    iceberg.catalog.type=nessie
+    iceberg.nessie.uri=http://nessie.lakehouse.svc.cluster.local:19120/api/v1
+    iceberg.nessie.warehouse=s3a://datalake/warehouse
+    iceberg.nessie.ref=main
+    hive.s3.endpoint=http://minio.lakehouse.svc.cluster.local:9000
+    hive.s3.path-style-access=true
+    hive.s3.access-key=minio
+    hive.s3.secret-key=minio123

@@ -30,11 +30,41 @@ spec:
                   key: rootPassword
           ports:
             - containerPort: 9000
+              name: api
             - containerPort: 9001
+              name: console
           volumeMounts:
             - name: data
               mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: api
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 20
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: pvc-lakehouse
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: lakehouse
+spec:
+  selector:
+    app: minio
+  ports:
+    - name: api
+      port: 9000
+      targetPort: 9000
+    - name: console
+      port: 9001
+      targetPort: 9001

@@ -1,0 +1,13 @@
+auth:
+  rootUser: ${MINIO_ROOT_USER}
+  rootPassword: ${MINIO_ROOT_PASSWORD}
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "local-path"
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m

@@ -1,11 +1,78 @@
-
 name: deathmetal-datalake
+
 build:
   - prefect_docker.build_docker_image:
       tag: ghcr.io/samuel-aka-viana/dmlakehouse:${{ git_sha }}
+
 pull:
   - prefect_git.clone_project:
       repository: https://github.com/samuel-aka-viana/deathmetal-datalake.git
       branch: feature/daft-nessie-iceberg-trino
+
 dependencies:
   - pip: requirements.txt
+
+work_pool:
+  name: lakehouse-k8s
+  type: kubernetes
+  job_variables:
+    namespace: lakehouse
+    image: ghcr.io/samuel-aka-viana/dmlakehouse:${{ git_sha }}
+    finished_job_ttl: 3600
+    image_pull_policy: IfNotPresent
+    env:
+      AWS_ENDPOINT: http://minio.lakehouse.svc.cluster.local:9000
+      PYTHONPATH: /opt/prefect/flows
+    service_account_name: prefect-worker
+
+deployments:
+  - name: lakehouse-pipeline
+    entrypoint: src/flows/lakehouse_pipeline.py:lakehouse_pipeline
+    schedule:
+      cron: "0 0 * * *"
+    parameters:
+      csv_folder: "data/input"
+    tags:
+      - lakehouse
+      - production
+    work_pool:
+      name: lakehouse-k8s
+    description: "Pipeline completo de Lakehouse: Landing → Bronze → Silver → Gold"
+
+  - name: landing-flow
+    entrypoint: src/flows/landing_flow.py:landing_flow
+    parameters:
+      folder: "data/input"
+    tags:
+      - landing
+      - standalone
+    work_pool:
+      name: lakehouse-k8s
+    description: "Flow para ingestão de CSVs para MinIO"
+
+  - name: bronze-flow
+    entrypoint: src/flows/bronze_flow.py:bronze_flow
+    tags:
+      - bronze
+      - standalone
+    work_pool:
+      name: lakehouse-k8s
+    description: "Flow para processar dados brutos para a camada Bronze"
+
+  - name: silver-flow
+    entrypoint: src/flows/silver_flow.py:silver_flow
+    tags:
+      - silver
+      - standalone
+    work_pool:
+      name: lakehouse-k8s
+    description: "Flow para processar dados da camada Bronze para a camada Silver"
+
+  - name: gold-flow
+    entrypoint: src/flows/gold_flow.py:gold_flow
+    tags:
+      - gold
+      - standalone
+    work_pool:
+      name: lakehouse-k8s
+    description: "Flow para processar dados da camada Silver para a camada Gold"
