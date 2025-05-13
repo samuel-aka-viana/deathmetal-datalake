@@ -1,0 +1,11 @@
+
+name: deathmetal-datalake
+build:
+  - prefect_docker.build_docker_image:
+      tag: ghcr.io/samuel-aka-viana/dmlakehouse:${{ git_sha }}
+pull:
+  - prefect_git.clone_project:
+      repository: https://github.com/samuel-aka-viana/deathmetal-datalake.git
+      branch: feature/daft-nessie-iceberg-trino
+dependencies:
+  - pip: requirements.txt
