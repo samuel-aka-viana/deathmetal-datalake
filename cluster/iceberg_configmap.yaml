@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iceberg-global
+  namespace: lakehouse
+  labels:
+    app: iceberg
+    component: catalog
+  annotations:
+    description: "Warehouse root em MinIO"
+data:
+  WAREHOUSE: "s3a://datalake/warehouse"
+  AWS_ACCESS_KEY_ID: "minio"
+  AWS_SECRET_ACCESS_KEY: "minio123"
+  AWS_ENDPOINT: "http://minio.lakehouse.svc.cluster.local:9000"
+  AWS_PATH_STYLE_ACCESS: "true"
