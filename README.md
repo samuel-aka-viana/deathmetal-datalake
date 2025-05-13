@@ -98,7 +98,7 @@ Execução sequencial dos flows Prefect:
 
 ```bash
 # 1. Ingestão (Landing)
-python flows/landing.py --folder csv
+python flows/landing_iceberg.py --folder csv
 
 # 2. Processamento Bronze
 python flows/bronze.py
